@@ -1,10 +1,11 @@
-﻿# /htdocs/.htaccess
-Options -Indexes
+﻿# /htdocs/.htaccess  (Uberspace docroot: /var/www/virtual/maestro/html)
+# Safer defaults
+Options -Indexes -MultiViews
 
-# Use our custom 404 (ASD rule: 404.html at root)
+# Use our custom 404 (file must be at /404.html under docroot)
 ErrorDocument 404 /404.html
 
-# (Optional) Basic caching: safe if mod_headers is available
+# Caching (optional)
 <IfModule mod_headers.c>
   <FilesMatch "\.html?$">
     Header set Cache-Control "no-cache"
@@ -14,18 +15,16 @@ ErrorDocument 404 /404.html
   </FilesMatch>
 </IfModule>
 
-
-# BLOCK'EM RATS
 <IfModule mod_rewrite.c>
 RewriteEngine On
 
-# Block empty user agents
+# --- Always allow the 404 itself (avoid accidental blocking) ---
+RewriteRule ^404\.html$ - [L]
+
+# --- Your bot rules (unchanged logic, just grouped) ---
+# Block empty UA OR "Mozilla" imposters that don't also match a real browser/bot UA
 RewriteCond %{HTTP_USER_AGENT} ^\s*$ [OR]
-
-# Block fake browser-like bots pretending to be Mozilla
 RewriteCond %{HTTP_USER_AGENT} ^Mozilla [NC]
-
-# Allow real browsers
 RewriteCond %{HTTP_USER_AGENT} !chrome [NC]
 RewriteCond %{HTTP_USER_AGENT} !safari [NC]
 RewriteCond %{HTTP_USER_AGENT} !firefox [NC]
@@ -34,8 +33,6 @@ RewriteCond %{HTTP_USER_AGENT} !brave [NC]
 RewriteCond %{HTTP_USER_AGENT} !opera [NC]
 RewriteCond %{HTTP_USER_AGENT} !vivaldi [NC]
 RewriteCond %{HTTP_USER_AGENT} !samsungbrowser [NC]
-
-# Allow social media crawlers
 RewriteCond %{HTTP_USER_AGENT} !facebookexternalhit [NC]
 RewriteCond %{HTTP_USER_AGENT} !linkedinbot [NC]
 RewriteCond %{HTTP_USER_AGENT} !twitterbot [NC]
@@ -43,15 +40,11 @@ RewriteCond %{HTTP_USER_AGENT} !instagram [NC]
 RewriteCond %{HTTP_USER_AGENT} !pinterest [NC]
 RewriteCond %{HTTP_USER_AGENT} !tiktok [NC]
 RewriteCond %{HTTP_USER_AGENT} !whatsapp [NC]
-
-# Allow real search engine bots
 RewriteCond %{HTTP_USER_AGENT} !googlebot [NC]
 RewriteCond %{HTTP_USER_AGENT} !bingbot [NC]
 RewriteCond %{HTTP_USER_AGENT} !slurp [NC]
 RewriteCond %{HTTP_USER_AGENT} !duckduckbot [NC]
 RewriteCond %{HTTP_USER_AGENT} !yandexbot [NC]
-
-# Allow AI search bots
 RewriteCond %{HTTP_USER_AGENT} !chatgpt-user [NC]
 RewriteCond %{HTTP_USER_AGENT} !gptbot [NC]
 RewriteCond %{HTTP_USER_AGENT} !perplexitybot [NC]
@@ -60,12 +53,17 @@ RewriteCond %{HTTP_USER_AGENT} !google-extended [NC]
 RewriteCond %{HTTP_USER_AGENT} !anthropicbot [NC]
 RewriteCond %{HTTP_USER_AGENT} !neevabot [NC]
 RewriteCond %{HTTP_USER_AGENT} !amazonbot [NC]
-
-# Block everything else
 RewriteRule .* - [F,L]
 
-# Block unknown bots from robots.txt and sitemap access
+# Block unknown bots from robots/sitemap access (but let known ones pass)
 RewriteCond %{REQUEST_URI} (robots\.txt|sitemap.*\.xml)$ [NC]
 RewriteCond %{HTTP_USER_AGENT} !(googlebot|bingbot|slurp|duckduckbot|yandexbot|ahrefsbot|semrushbot|mj12bot|rogerbot|dotbot|ubersuggest|chatgpt-user|gptbot|perplexitybot|youbot|google-extended|anthropicbot|neevabot|amazonbot) [NC]
 RewriteRule ^.*$ - [F,L]
+
+# --- Fallback 404 for anything that doesn't exist ---
+# (Only triggers when the request is not a real file/dir and no rule above matched)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ /404.html [L,R=404]
+
 </IfModule>

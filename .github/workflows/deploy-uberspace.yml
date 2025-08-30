@@ -1,0 +1,27 @@
+﻿name: Deploy to Uberspace (ASD static)
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "parametric-static/**"
+      - ".github/workflows/deploy-uberspace.yml"
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Mirror baked site -> Uberspace web root via rsync/SSH
+      - name: Rsync to Uberspace
+        uses: Burnett01/rsync-deployments@7.1.0
+        with:
+          # -e passes SSH options so the runner auto-accepts the host key on first run
+          switches: -avzr --delete -e "ssh -o StrictHostKeyChecking=accept-new -o HostKeyAlgorithms=ssh-ed25519 -o PubkeyAcceptedKeyTypes=ssh-ed25519"
+          path: parametric-static/
+          remote_path: ${{ secrets.UBERSPACE_REMOTE_PATH }}
+          remote_host: ${{ secrets.UBERSPACE_HOST }}
+          remote_user: ${{ secrets.UBERSPACE_USER }}
+          remote_key: ${{ secrets.UBERSPACE_SSH_KEY }}

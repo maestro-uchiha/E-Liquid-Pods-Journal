@@ -1,7 +1,7 @@
 ﻿{
-  "SiteName": "My ASD Site",
+  "SiteName": "E-Liquid Pods Journal",
   "StoreUrl": "https://example.com/",
   "Description": "Clean static sites with ASD.",
-  "BaseUrl": "https://maestro-uchiha.github.io/my-new-asd-site/",
+  "BaseUrl": "https://maestro.uber.space/",
   "author": { "name": "Maestro" }
 }

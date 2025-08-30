@@ -1,4 +1,4 @@
-﻿# /htdocs/.htaccess  (Uberspace docroot: /var/www/virtual/maestro/html)
+# /htdocs/.htaccess  (Uberspace docroot: /var/www/virtual/maestro/html)
 # Safer defaults
 Options -Indexes -MultiViews
 
